@@ -21,10 +21,6 @@ STEP-5: Combine all these groups to get the complete cipher text.
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-
-#define SIZE 2  // Size of the key matrix (2x2)
-
-
 int modInverse(int a, int m) {
     a = a % m;
     for (int x = 1; x < m; x++) {
@@ -33,8 +29,6 @@ int modInverse(int a, int m) {
     }
     return -1;
 }
-
-
 void multiply(int keyMatrix[SIZE][SIZE], int block[SIZE], int result[SIZE]) {
     for (int i = 0; i < SIZE; i++) {
         result[i] = 0;
@@ -44,8 +38,6 @@ void multiply(int keyMatrix[SIZE][SIZE], int block[SIZE], int result[SIZE]) {
         result[i] %= 26;
     }
 }
-
-
 void encrypt(char plaintext[], int keyMatrix[SIZE][SIZE], char ciphertext[]) {
     int block[SIZE], result[SIZE];
     int len = strlen(plaintext);
