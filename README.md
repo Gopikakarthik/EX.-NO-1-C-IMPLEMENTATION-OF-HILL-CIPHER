@@ -16,82 +16,97 @@ STEP-4: Multiply the two matrices to obtain the cipher text of length three.
 STEP-5: Combine all these groups to get the complete cipher text.
 
 ## PROGRAM: 
-
 ```
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-int modInverse(int a, int m) {
-    a = a % m;
-    for (int x = 1; x < m; x++) {
-        if ((a * x) % m == 1)
-            return x;
-    }
-    return -1;
-}
-void multiply(int keyMatrix[SIZE][SIZE], int block[SIZE], int result[SIZE]) {
-    for (int i = 0; i < SIZE; i++) {
-        result[i] = 0;
-        for (int j = 0; j < SIZE; j++) {
-            result[i] += keyMatrix[i][j] * block[j];
-        }
-        result[i] %= 26;
-    }
-}
-void encrypt(char plaintext[], int keyMatrix[SIZE][SIZE], char ciphertext[]) {
-    int block[SIZE], result[SIZE];
-    int len = strlen(plaintext);
-    int i, j;
 
-    for (i = 0; i < len; i += SIZE) {
-        for (j = 0; j < SIZE; j++) {
-            block[j] = plaintext[i + j] - 'A';
-        }
-        multiply(keyMatrix, block, result);
-        for (j = 0; j < SIZE; j++) {
-            ciphertext[i + j] = result[j] + 'A';
-        }
-    }
-    ciphertext[len] = '\0';
+int keymat[3][3] = { { 1, 2, 1 }, { 2, 3, 2 }, { 2, 2, 1 } };
+int invkeymat[3][3] = { { -1, 0, 1 }, { 2, -1, 0 }, { -2, 2, -1 } };
+char key[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+char* encode(char a, char b, char c) {
+    static char ret[4];
+    int x, y, z;
+    int posa = (int) a - 65;
+    int posb = (int) b - 65;
+    int posc = (int) c - 65;
+
+    x = posa * keymat[0][0] + posb * keymat[1][0] + posc * keymat[2][0];
+    y = posa * keymat[0][1] + posb * keymat[1][1] + posc * keymat[2][1];
+    z = posa * keymat[0][2] + posb * keymat[1][2] + posc * keymat[2][2];
+
+    ret[0] = key[x % 26];
+    ret[1] = key[y % 26];
+    ret[2] = key[z % 26];
+    ret[3] = '\0';
+
+    return ret;
 }
 
-void prepareText(char plaintext[]) {
-    int len = strlen(plaintext);
-    int i;
+char* decode(char a, char b, char c) {
+    static char ret[4];
+    int x, y, z;
+    int posa = (int) a - 65;
+    int posb = (int) b - 65;
+    int posc = (int) c - 65;
 
-    
-    for (i = 0; i < len; i++) {
-        plaintext[i] = toupper(plaintext[i]);
-    }
+    x = posa * invkeymat[0][0] + posb * invkeymat[1][0] + posc * invkeymat[2][0];
+    y = posa * invkeymat[0][1] + posb * invkeymat[1][1] + posc * invkeymat[2][1];
+    z = posa * invkeymat[0][2] + posb * invkeymat[1][2] + posc * invkeymat[2][2];
 
-    
-    if (len % SIZE != 0) {
-        for (i = len; i < len + SIZE - (len % SIZE); i++) {
-            plaintext[i] = 'X';
-        }
-        plaintext[i] = '\0';
-    }
+    ret[0] = key[(x % 26 < 0) ? (26 + x % 26) : (x % 26)];
+    ret[1] = key[(y % 26 < 0) ? (26 + y % 26) : (y % 26)];
+    ret[2] = key[(z % 26 < 0) ? (26 + z % 26) : (z % 26)];
+    ret[3] = '\0';
+
+    return ret;
 }
 
 int main() {
-    char plaintext[100], ciphertext[100];
-    int keyMatrix[SIZE][SIZE] = {{3, 3}, {2, 5}};  // Example key matrix (2x2)
+    char msg[1000];
+    char enc[1000] = "";
+    char dec[1000] = "";
+    int n;
 
-    printf("Enter the plaintext (without spaces): ");
-    scanf("%s", plaintext);
+    strcpy(msg, "HelloWorld");
+    printf("Simulation of Hill Cipher\n");
+    printf("Input message : %s\n", msg);
 
-    prepareText(plaintext);
-    encrypt(plaintext, keyMatrix, ciphertext);
+    for (int i = 0; i < strlen(msg); i++) {
+        msg[i] = toupper(msg[i]);
+    }
 
-    printf("Ciphertext: %s\n", ciphertext);
+    // Remove spaces
+    n = strlen(msg) % 3;
+    // Append padding text X
+    if (n != 0) {
+        for (int i = 1; i <= (3 - n); i++) {
+            strcat(msg, "X");
+        }
+    }
+    printf("Padded message : %s\n", msg);
+
+    for (int i = 0; i < strlen(msg); i += 3) {
+        char a = msg[i];
+        char b = msg[i + 1];
+        char c = msg[i + 2];
+        strcat(enc, encode(a, b, c));
+    }
+    printf("Encoded message : %s\n", enc);
+
+    for (int i = 0; i < strlen(enc); i += 3) {
+        char a = enc[i];
+        char b = enc[i + 1];
+        char c = enc[i + 2];
+        strcat(dec, decode(a, b, c));
+    }
+    printf("Decoded message : %s\n", dec);
 
     return 0;
-}
-
+}   
 ```
 ## OUTPUT:
-
-![Screenshot 2024-08-28 161728](https://github.com/user-attachments/assets/00ca4dec-1c99-4f41-94e3-7982e97c385d)
-
+![Screenshot 2024-11-11 103817](https://github.com/user-attachments/assets/3a6653e4-2622-4019-87d1-bb7f2b7429cf)
 ## RESULT:
   Thus the hill cipher substitution technique had been implemented successfully.
